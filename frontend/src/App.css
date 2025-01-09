@@ -1,0 +1,168 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+const DashboardActivos = () => {
+  const [stats, setStats] = useState({
+    totalActivos: 0,
+    valorTotal: 0,
+    activosActivos: 0,
+    activosInactivos: 0,
+    depreciacionMes: 0
+  });
+
+  const [distribucionCategorias, setDistribucionCategorias] = useState([]);
+  const [movimientosRecientes, setMovimientosRecientes] = useState([]);
+
+  useEffect(() => {
+    // Aquí se cargarían los datos desde el backend
+    cargarDatos();
+  }, []);
+
+  const cargarDatos = async () => {
+    try {
+      // TODO: Implementar llamada al backend
+      const data = {
+        totalActivos: 150,
+        valorTotal: 500000,
+        activosActivos: 120,
+        activosInactivos: 30,
+        depreciacionMes: 5000,
+        distribucionCategorias: [
+          { name: 'Equipos', value: 40 },
+          { name: 'Muebles', value: 30 },
+          { name: 'Vehículos', value: 20 },
+          { name: 'Edificios', value: 10 }
+        ],
+        movimientos: [
+          { fecha: '2024-01-01', tipo: 'ALTA', valor: 1000 },
+          { fecha: '2024-01-02', tipo: 'BAJA', valor: 500 },
+          { fecha: '2024-01-03', tipo: 'MEJORA', valor: 200 }
+        ]
+      };
+
+      setStats({
+        totalActivos: data.totalActivos,
+        valorTotal: data.valorTotal,
+        activosActivos: data.activosActivos,
+        activosInactivos: data.activosInactivos,
+        depreciacionMes: data.depreciacionMes
+      });
+
+      setDistribucionCategorias(data.distribucionCategorias);
+      setMovimientosRecientes(data.movimientos);
+    } catch (error) {
+      console.error('Error cargando datos:', error);
+    }
+  };
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+  return (
+    <div className="p-4">
+      {/* Resumen */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Activos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalActivos}</div>
+            <div className="text-sm text-gray-500">
+              Activos: {stats.activosActivos} | Inactivos: {stats.activosInactivos}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Valor Total</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              S/. {stats.valorTotal.toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Depreciación del Mes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              S/. {stats.depreciacionMes.toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Distribución por Categoría</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={distribucionCategorias}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {distribucionCategorias.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Movimientos Recientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full h-[300px]">
+              <ResponsiveContainer>
+                <LineChart data={movimientosRecientes}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="fecha" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="valor" stroke="#8884d8" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardActivos;
